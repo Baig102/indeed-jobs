@@ -1,12 +1,39 @@
 __pycache__/
 *.py[cod]
+*$py.class
+
 venv/
+.env/
+.venv/
+
 *.egg-info/
+dist/
+build/
+*.egg
 
 *.db
 
 *.csv
 
+.env
+
 .vscode/
 .idea/
+
 .DS_Store
+
+instance/
+*.log
+
+*.manifest
+*.spec
+
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+
+.ipynb_checkpoints/
