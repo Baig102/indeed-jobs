@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Scraping System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-briefcase"></i> Job Scraping System
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/task1">Task 1: Scraper</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/task2">Task 2: Database</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/task3">Task 3: API</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold">
+                <i class="fas fa-rocket text-primary"></i> 
+                Job Scraping & Management System
+            </h1>
+            <p class="lead text-muted">Complete solution for scraping, storing, and managing job listings</p>
+        </div>
+
+        <!-- System Status -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card stat-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-file-csv fa-3x text-success mb-3"></i>
+                        <h5>CSV Status</h5>
+                        <p class="mb-0" id="csv-status">
+                            <span class="spinner-border spinner-border-sm"></span> Loading...
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stat-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-database fa-3x text-info mb-3"></i>
+                        <h5>Database Status</h5>
+                        <p class="mb-0" id="db-status">
+                            <span class="spinner-border spinner-border-sm"></span> Loading...
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stat-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-briefcase fa-3x text-warning mb-3"></i>
+                        <h5>Total Jobs</h5>
+                        <h2 class="mb-0 text-primary" id="total-jobs">
+                            <span class="spinner-border spinner-border-sm"></span>
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Cards -->
+        <div class="row g-4">
+            <!-- Task 1 -->
+            <div class="col-md-4">
+                <div class="card task-card h-100 border-0 shadow">
+                    <div class="card-body">
+                        <div class="task-icon mb-3">
+                            <i class="fas fa-spider fa-3x text-primary"></i>
+                        </div>
+                        <h3 class="card-title">Task 1: Web Scraping</h3>
+                        <p class="card-text text-muted">
+                            Scrape job listings from Indeed.com by position, location, and date filters.
+                        </p>
+                        <ul class="list-unstyled mb-4">
+                            <li><i class="fas fa-check text-success"></i> BeautifulSoup scraping</li>
+                            <li><i class="fas fa-check text-success"></i> Pagination handling</li>
+                            <li><i class="fas fa-check text-success"></i> CSV export</li>
+                            <li><i class="fas fa-check text-success"></i> Error handling</li>
+                        </ul>
+                        <a href="/task1" class="btn btn-primary w-100">
+                            <i class="fas fa-play"></i> Start Scraping
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Task 2 -->
+            <div class="col-md-4">
+                <div class="card task-card h-100 border-0 shadow">
+                    <div class="card-body">
+                        <div class="task-icon mb-3">
+                            <i class="fas fa-database fa-3x text-info"></i>
+                        </div>
+                        <h3 class="card-title">Task 2: Database Storage</h3>
+                        <p class="card-text text-muted">
+                            Load scraped data from CSV into MySQL database for long-term storage.
+                        </p>
+                        <ul class="list-unstyled mb-4">
+                            <li><i class="fas fa-check text-success"></i> MySQL database</li>
+                            <li><i class="fas fa-check text-success"></i> CSV import</li>
+                            <li><i class="fas fa-check text-success"></i> Duplicate prevention</li>
+                            <li><i class="fas fa-check text-success"></i> Data validation</li>
+                        </ul>
+                        <a href="/task2" class="btn btn-info w-100">
+                            <i class="fas fa-database"></i> Load Database
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Task 3 -->
+            <div class="col-md-4">
+                <div class="card task-card h-100 border-0 shadow">
+                    <div class="card-body">
+                        <div class="task-icon mb-3">
+                            <i class="fas fa-code fa-3x text-success"></i>
+                        </div>
+                        <h3 class="card-title">Task 3: REST API</h3>
+                        <p class="card-text text-muted">
+                            Manage jobs through RESTful API with full CRUD operations and filtering.
+                        </p>
+                        <ul class="list-unstyled mb-4">
+                            <li><i class="fas fa-check text-success"></i> View all jobs</li>
+                            <li><i class="fas fa-check text-success"></i> Filter by city/position</li>
+                            <li><i class="fas fa-check text-success"></i> Add/Update/Delete</li>
+                            <li><i class="fas fa-check text-success"></i> JSON responses</li>
+                        </ul>
+                        <a href="/task3" class="btn btn-success w-100">
+                            <i class="fas fa-cogs"></i> Manage Jobs
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Guide -->
+        <div class="card mt-5 border-0 shadow">
+            <div class="card-body">
+                <h4 class="card-title mb-4">
+                    <i class="fas fa-lightbulb text-warning"></i> Quick Start Guide
+                </h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="step-item">
+                            <div class="step-number">1</div>
+                            <h5>Scrape Jobs</h5>
+                            <p class="text-muted">Go to Task 1, enter job position and city, then scrape listings from Indeed.com</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="step-item">
+                            <div class="step-number">2</div>
+                            <h5>Load Database</h5>
+                            <p class="text-muted">Go to Task 2 to load the scraped CSV data into MySQL database</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="step-item">
+                            <div class="step-number">3</div>
+                            <h5>Manage via API</h5>
+                            <p class="text-muted">Use Task 3 to view, filter, add, update, or delete job records</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <p class="mb-0">Job Scraping & Management System | Built with Flask, BeautifulSoup & Bootstrap</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

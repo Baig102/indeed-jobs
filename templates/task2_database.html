@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task 2: Database Storage</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-info">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-briefcase"></i> Job Scraping System
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="text-center mb-4">
+            <h1 class="display-5">
+                <i class="fas fa-database text-info"></i> Task 2: Database Storage
+            </h1>
+            <p class="lead text-muted">Load scraped data from CSV into MySQL database</p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow border-0">
+                    <div class="card-body p-4 text-center">
+                        <i class="fas fa-file-csv fa-4x text-success mb-3"></i>
+                        <h4>Load CSV to Database</h4>
+                        <p class="text-muted">
+                            This will read <code>indeed_jobs.csv</code> and load all job records into the MySQL database.
+                            Duplicate entries will be automatically skipped.
+                        </p>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Note:</strong> Make sure you have run Task 1 (Web Scraping) first to generate the CSV file.
+                        </div>
+
+                        <button class="btn btn-info btn-lg" id="loadBtn" onclick="loadDatabase()">
+                            <i class="fas fa-upload"></i> Load Data to Database
+                        </button>
+
+                        <!-- Progress -->
+                        <div id="progressContainer" class="mt-4" style="display: none;">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-spinner fa-spin"></i> Loading data to database...
+                            </div>
+                        </div>
+
+                        <!-- Result -->
+                        <div id="resultContainer" class="mt-4" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- Database Stats -->
+                <div id="dbStats" class="mt-4" style="display: none;">
+                    <div class="card shadow border-0">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Database Statistics</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <div class="stat-box">
+                                        <h3 class="text-success" id="insertedCount">0</h3>
+                                        <p class="text-muted">New Records Inserted</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stat-box">
+                                        <h3 class="text-warning" id="duplicateCount">0</h3>
+                                        <p class="text-muted">Duplicates Skipped</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stat-box">
+                                        <h3 class="text-primary" id="totalCount">0</h3>
+                                        <p class="text-muted">Total in Database</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function loadDatabase() {
+            const loadBtn = document.getElementById('loadBtn');
+            const progressContainer = document.getElementById('progressContainer');
+            const resultContainer = document.getElementById('resultContainer');
+            const dbStats = document.getElementById('dbStats');
+            
+            loadBtn.disabled = true;
+            progressContainer.style.display = 'block';
+            resultContainer.style.display = 'none';
+            dbStats.style.display = 'none';
+            
+            try {
+                const response = await fetch('/load-database', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                progressContainer.style.display = 'none';
+                resultContainer.style.display = 'block';
+                
+                if (data.success) {
+                    resultContainer.innerHTML = `
+                        <div class="alert alert-success" style="background: rgba(16, 185, 129, 0.2); border-left: 4px solid #10b981; color: #f1f5f9;">
+                            <h5><i class="fas fa-check-circle"></i> ✅ Database Loaded Successfully!</h5>
+                            <p class="mb-0">Data has been imported into MySQL database</p>
+                        </div>
+                        <a href="/task3" class="btn btn-success">
+                            <i class="fas fa-arrow-right"></i> Continue to Task 3: Manage via API
+                        </a>
+                    `;
+                    
+                    // Show stats
+                    dbStats.style.display = 'block';
+                    document.getElementById('insertedCount').textContent = data.inserted;
+                    document.getElementById('duplicateCount').textContent = data.duplicates;
+                    document.getElementById('totalCount').textContent = data.total || (data.inserted + data.duplicates);
+                } else {
+                    resultContainer.innerHTML = `
+                        <div class="alert alert-info" style="background: rgba(59, 130, 246, 0.2); border-left: 4px solid #3b82f6; color: #f1f5f9;">
+                            <h5><i class="fas fa-info-circle"></i> ℹ️ CSV File Not Found</h5>
+                            <p class="mb-2"><strong>Good News:</strong> Sample data file already exists!</p>
+                            <p class="mb-2">The file <code>indeed_jobs.csv</code> contains 15 sample Pakistani tech jobs.</p>
+                            <p class="mb-0"><strong>Note:</strong> If you just created it, make sure the file is in the correct location: <code>/home/baig/Documents/projects/phthon/getJobs/indeed_jobs.csv</code></p>
+                        </div>
+                        <button class="btn btn-info" onclick="loadDatabase()">
+                            <i class="fas fa-sync"></i> Try Again
+                        </button>
+                    `;
+                }
+            } catch (error) {
+                progressContainer.style.display = 'none';
+                resultContainer.style.display = 'block';
+                resultContainer.innerHTML = `
+                    <div class="alert alert-danger" style="background: rgba(239, 68, 68, 0.2); border-left: 4px solid #ef4444; color: #f1f5f9;">
+                        <h5><i class="fas fa-exclamation-circle"></i> ❌ Error</h5>
+                        <p class="mb-0">${error.message}</p>
+                    </div>
+                `;
+            } finally {
+                loadBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

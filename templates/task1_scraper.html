@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task 1: Web Scraping</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-briefcase"></i> Job Scraping System
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="text-center mb-4">
+            <h1 class="display-5">
+                <i class="fas fa-spider text-primary"></i> Task 1: Web Scraping
+            </h1>
+            <p class="lead text-muted">Scrape job listings from Indeed.com</p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow border-0">
+                    <div class="card-body p-4">
+                        <form id="scraperForm">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-search"></i> Job Position/Title
+                                </label>
+                                <input type="text" class="form-control form-control-lg" id="position" 
+                                       placeholder="e.g., Python Developer" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-map-marker-alt"></i> City/Location
+                                </label>
+                                <input type="text" class="form-control form-control-lg" id="city" 
+                                       placeholder="e.g., Lahore, London" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-calendar-alt"></i> Date Posted
+                                </label>
+                                <select class="form-select form-select-lg" id="date_posted">
+                                    <option value="">Any time</option>
+                                    <option value="1">Today</option>
+                                    <option value="3">Last 3 days</option>
+                                    <option value="7">Last 7 days</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-layer-group"></i> Maximum Pages to Scrape
+                                </label>
+                                <input type="number" class="form-control form-control-lg" id="max_pages" 
+                                       value="5" min="1" max="10">
+                                <small class="text-muted">Each page contains approximately 10-15 jobs</small>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-lg w-100" id="scrapeBtn">
+                                <i class="fas fa-play"></i> Start Scraping
+                            </button>
+                        </form>
+
+                        <!-- Progress -->
+                        <div id="progressContainer" class="mt-4" style="display: none;">
+                            <div class="alert alert-info">
+                                <i class="fas fa-spinner fa-spin"></i> <span id="progressText">Scraping in progress...</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" style="width: 100%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Result -->
+                        <div id="resultContainer" class="mt-4" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- Jobs Preview -->
+                <div id="jobsPreview" class="mt-4" style="display: none;">
+                    <div class="card shadow border-0">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fas fa-list"></i> Scraped Jobs Preview</h5>
+                        </div>
+                        <div class="card-body" id="jobsList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('scraperForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const position = document.getElementById('position').value;
+            const city = document.getElementById('city').value;
+            const date_posted = document.getElementById('date_posted').value;
+            const max_pages = document.getElementById('max_pages').value;
+            
+            const scrapeBtn = document.getElementById('scrapeBtn');
+            const progressContainer = document.getElementById('progressContainer');
+            const resultContainer = document.getElementById('resultContainer');
+            const jobsPreview = document.getElementById('jobsPreview');
+            
+            scrapeBtn.disabled = true;
+            progressContainer.style.display = 'block';
+            resultContainer.style.display = 'none';
+            jobsPreview.style.display = 'none';
+            
+            try {
+                const response = await fetch('/run-scraper', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ position, city, date_posted, max_pages })
+                });
+                
+                const data = await response.json();
+                
+                progressContainer.style.display = 'none';
+                resultContainer.style.display = 'block';
+                
+                if (data.success && data.count > 0) {
+                    resultContainer.innerHTML = `
+                        <div class="alert alert-success" style="background: rgba(16, 185, 129, 0.2); border-left: 4px solid #10b981; color: #f1f5f9;">
+                            <h5><i class="fas fa-check-circle"></i> ✅ Scraping Completed!</h5>
+                            <p class="mb-0">Successfully scraped <strong>${data.count}</strong> jobs and saved to <code>indeed_jobs.csv</code></p>
+                        </div>
+                        <a href="/task2" class="btn btn-info">
+                            <i class="fas fa-arrow-right"></i> Continue to Task 2: Load to Database
+                        </a>
+                    `;
+                    
+                    // Show jobs preview
+                    if (data.jobs && data.jobs.length > 0) {
+                        jobsPreview.style.display = 'block';
+                        const jobsList = document.getElementById('jobsList');
+                        jobsList.innerHTML = data.jobs.slice(0, 5).map(job => `
+                            <div class="border-bottom pb-3 mb-3">
+                                <h6 class="text-primary">${job.title}</h6>
+                                <p class="mb-1"><strong>${job.company}</strong> - ${job.location}</p>
+                                <p class="text-muted small mb-0">${job.description ? job.description.substring(0, 100) : 'No description'}...</p>
+                            </div>
+                        `).join('') + (data.jobs.length > 5 ? `<p class="text-muted">... and ${data.jobs.length - 5} more jobs</p>` : '');
+                    }
+                } else if (data.count === 0) {
+                    resultContainer.innerHTML = `
+                        <div class="alert alert-warning" style="background: rgba(245, 158, 11, 0.2); border-left: 4px solid #f59e0b; color: #f1f5f9;">
+                            <h5><i class="fas fa-exclamation-triangle"></i> ⚠️ No Jobs Found</h5>
+                            <p class="mb-2">Indeed.com is blocking the scraper or no results found for your search.</p>
+                            <p class="mb-2"><strong>Solution:</strong> Use the sample data provided!</p>
+                            <ol class="mb-0" style="color: #cbd5e1;">
+                                <li>A file <code>indeed_jobs.csv</code> with 15 sample jobs already exists</li>
+                                <li>Go to <strong>Task 2</strong> and click "Load from CSV"</li>
+                                <li>Then manage jobs in <strong>Task 3</strong></li>
+                            </ol>
+                        </div>
+                        <a href="/task2" class="btn btn-info">
+                            <i class="fas fa-arrow-right"></i> Go to Task 2: Load Sample Data
+                        </a>
+                    `;
+                } else {
+                    resultContainer.innerHTML = `
+                        <div class="alert alert-danger" style="background: rgba(239, 68, 68, 0.2); border-left: 4px solid #ef4444; color: #f1f5f9;">
+                            <h5><i class="fas fa-exclamation-circle"></i> ❌ Error</h5>
+                            <p class="mb-0">${data.error || 'Failed to scrape jobs'}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                progressContainer.style.display = 'none';
+                resultContainer.style.display = 'block';
+                resultContainer.innerHTML = `
+                    <div class="alert alert-danger" style="background: rgba(239, 68, 68, 0.2); border-left: 4px solid #ef4444; color: #f1f5f9;">
+                        <h5><i class="fas fa-exclamation-circle"></i> ❌ Error</h5>
+                        <p class="mb-0">${error.message}</p>
+                    </div>
+                `;
+            } finally {
+                scrapeBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

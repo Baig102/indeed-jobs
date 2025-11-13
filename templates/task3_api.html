@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task 3: API Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-briefcase"></i> Job Scraping System
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="text-center mb-4">
+            <h1 class="display-5">
+                <i class="fas fa-code text-success"></i> Task 3: API Management
+            </h1>
+            <p class="lead text-muted">View, filter, add, update, and delete job records</p>
+        </div>
+
+        <!-- Filters and Actions -->
+        <div class="card shadow border-0 mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" id="filterCity" placeholder="Filter by city...">
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" id="filterPosition" placeholder="Filter by position...">
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-primary w-100" onclick="loadJobs()">
+                            <i class="fas fa-search"></i> Search Jobs
+                        </button>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addJobModal">
+                            <i class="fas fa-plus"></i> Add New Job
+                        </button>
+                        <button class="btn btn-info" onclick="loadJobs()">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jobs Count -->
+        <div class="alert alert-info">
+            <strong>Total Jobs:</strong> <span id="jobsCount">0</span>
+        </div>
+
+        <!-- Jobs List -->
+        <div id="jobsList"></div>
+    </div>
+
+    <!-- Add Job Modal -->
+    <div class="modal fade" id="addJobModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-plus"></i> Add New Job</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addJobForm">
+                        <div class="mb-3">
+                            <label class="form-label">Job Title *</label>
+                            <input type="text" class="form-control" id="newTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Company *</label>
+                            <input type="text" class="form-control" id="newCompany" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Location</label>
+                            <input type="text" class="form-control" id="newLocation">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Salary</label>
+                            <input type="text" class="form-control" id="newSalary" placeholder="e.g., $80k-$100k">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Job Type</label>
+                            <select class="form-select" id="newJobType">
+                                <option value="N/A">Select Type</option>
+                                <option value="Full-time">Full-time</option>
+                                <option value="Part-time">Part-time</option>
+                                <option value="Contract">Contract</option>
+                                <option value="Internship">Internship</option>
+                                <option value="Remote">Remote</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Date Posted</label>
+                            <input type="text" class="form-control" id="newDate" placeholder="e.g., 2 days ago">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" id="newDescription" rows="3" placeholder="Job description..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Job URL</label>
+                            <input type="url" class="form-control" id="newUrl" placeholder="https://...">
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-plus"></i> Add Job
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Job Modal -->
+    <div class="modal fade" id="editJobModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title"><i class="fas fa-edit"></i> Edit Job</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editJobForm">
+                        <input type="hidden" id="editJobId">
+                        <div class="mb-3">
+                            <label class="form-label">Job Title</label>
+                            <input type="text" class="form-control" id="editTitle">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Company</label>
+                            <input type="text" class="form-control" id="editCompany">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Location</label>
+                            <input type="text" class="form-control" id="editLocation">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Salary</label>
+                            <input type="text" class="form-control" id="editSalary">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Job Type</label>
+                            <select class="form-select" id="editJobType">
+                                <option value="N/A">Select Type</option>
+                                <option value="Full-time">Full-time</option>
+                                <option value="Part-time">Part-time</option>
+                                <option value="Contract">Contract</option>
+                                <option value="Internship">Internship</option>
+                                <option value="Remote">Remote</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Date Posted</label>
+                            <input type="text" class="form-control" id="editDate">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" id="editDescription" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-info w-100">
+                            <i class="fas fa-save"></i> Update Job
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/task3.js') }}"></script>
+</body>
+</html>
